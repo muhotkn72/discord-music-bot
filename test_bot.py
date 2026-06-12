@@ -5,6 +5,7 @@ Test script to validate bot configuration and components
 
 import sys
 import os
+import traceback
 from pathlib import Path
 
 def test_imports():
@@ -20,6 +21,7 @@ def test_imports():
         return True
     except ImportError as e:
         print(f'  ❌ Import failed: {e}')
+        traceback.print_exc()
         return False
 
 def test_config():
@@ -51,6 +53,7 @@ def test_config():
         return True
     except Exception as e:
         print(f'  ❌ Configuration test failed: {e}')
+        traceback.print_exc()
         return False
 
 def test_spotify_client():
@@ -72,6 +75,7 @@ def test_spotify_client():
             return False
     except Exception as e:
         print(f'  ❌ Spotify test failed: {e}')
+        traceback.print_exc()
         return False
 
 def test_youtube_client():
@@ -91,6 +95,7 @@ def test_youtube_client():
         return True
     except Exception as e:
         print(f'  ❌ YouTube test failed: {e}')
+        traceback.print_exc()
         return False
 
 def test_queue():
@@ -127,6 +132,7 @@ def test_queue():
         return True
     except Exception as e:
         print(f'  ❌ Queue test failed: {e}')
+        traceback.print_exc()
         return False
 
 def test_logger():
@@ -142,6 +148,7 @@ def test_logger():
         return True
     except Exception as e:
         print(f'  ❌ Logger test failed: {e}')
+        traceback.print_exc()
         return False
 
 def main():
