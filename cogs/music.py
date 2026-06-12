@@ -18,6 +18,55 @@ class Music(commands.Cog):
             self.queues[guild_id] = MusicQueue()
         return self.queues[guild_id]
     
+    @commands.command(name='join', help='Bot joins your voice channel')
+    async def join(self, ctx):
+        """Bot joins the voice channel"""
+        try:
+            if ctx.author.voice is None:
+                await ctx.send('❌ You must be in a voice channel!')
+                return
+            
+            channel = ctx.author.voice.channel
+            
+            # Check if already connected
+            if ctx.voice_client is not None:
+                if ctx.voice_client.channel.id == channel.id:
+                    await ctx.send(f'✅ Already connected to {channel.name}')
+                    return
+                else:
+                    await ctx.voice_client.disconnect()
+            
+            vc = await channel.connect()
+            embed = discord.Embed(
+                title='✅ Joined Voice Channel',
+                description=f'Connected to {channel.name}',
+                color=discord.Color.green()
+            )
+            await ctx.send(embed=embed)
+            logger.info(f'Bot joined voice channel: {channel.name}')
+        except Exception as e:
+            logger.error(f'Error joining voice channel: {e}')
+            await ctx.send(f'❌ Could not join voice channel: {str(e)}')
+    
+    @commands.command(name='leave', help='Bot leaves the voice channel')
+    async def leave(self, ctx):
+        """Bot leaves the voice channel"""
+        try:
+            if ctx.voice_client is None:
+                await ctx.send('❌ Bot is not connected to a voice channel')
+                return
+            
+            await ctx.voice_client.disconnect()
+            embed = discord.Embed(
+                title='👋 Left Voice Channel',
+                color=discord.Color.orange()
+            )
+            await ctx.send(embed=embed)
+            logger.info('Bot left voice channel')
+        except Exception as e:
+            logger.error(f'Error leaving voice channel: {e}')
+            await ctx.send(f'❌ Could not leave voice channel: {str(e)}')
+    
     @commands.command(name='play', help='Play a song from Spotify or YouTube')
     async def play(self, ctx, *, query: str):
         """Play a song"""
@@ -26,6 +75,13 @@ class Music(commands.Cog):
             return
         
         try:
+            # Auto-join if not connected
+            if ctx.voice_client is None:
+                if ctx.author.voice is None:
+                    await ctx.send('❌ You must be in a voice channel!')
+                    return
+                await ctx.invoke(self.join)
+            
             # Determine source and search
             if 'spotify' in query.lower():
                 songs = self.spotify.search_track(query.replace('spotify ', ''), limit=1)
@@ -141,6 +197,10 @@ class Music(commands.Cog):
         try:
             queue = self.get_queue(ctx.guild.id)
             queue.clear()
+            
+            # Stop voice playback
+            if ctx.voice_client and ctx.voice_client.is_playing():
+                ctx.voice_client.stop()
             
             embed = discord.Embed(
                 title='⏹️ Music Stopped',
