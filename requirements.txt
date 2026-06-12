@@ -1,8 +1,4 @@
 discord.py==2.3.2
 python-dotenv==1.0.0
-spotify-dl==7.4.0
-spotifyeasy==0.1.9
-ytdl-core==2023.11.16
-pytube==15.0.0
 requests==2.31.0
-future==0.18.3
+yt-dlp==2024.1.1
